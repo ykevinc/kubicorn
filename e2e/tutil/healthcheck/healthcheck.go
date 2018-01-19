@@ -38,10 +38,14 @@ func VerifyNodeReadiness(client *k8s.Clientset) error {
 		return err
 	}
 	for _, node := range nodes.Items {
+		status := false
 		for _, c := range node.Status.Conditions {
-			if c.Type != v1.NodeReady {
-				return fmt.Errorf("node %s not ready", node.Name)
+			if c.Type == v1.NodeReady {
+				status = true
 			}
+		}
+		if !status {
+			return fmt.Errorf("node %s not ready", node.Name)
 		}
 	}
 	return nil
@@ -54,10 +58,14 @@ func VerifyComponentStatues(client *k8s.Clientset) error {
 		return err
 	}
 	for _, cs := range compstat.Items {
+		healthy := false
 		for _, c := range cs.Conditions {
-			if c.Type != v1.ComponentHealthy {
-				return fmt.Errorf("component %s not healthy", cs.Name)
+			if c.Type == v1.ComponentHealthy {
+				healthy = true
 			}
+		}
+		if !healthy {
+			return fmt.Errorf("component %s not healthy", cs.Name)
 		}
 	}
 	return nil

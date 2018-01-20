@@ -48,7 +48,7 @@ func TestMain(m *testing.M) {
 	}
 
 	// Node count.
-	c, err := healthcheck.GetNodeCount(client)
+	c, err := healthcheck.RetryGetNodeCount(client, 3)
 	if err != nil {
 		panic(err)
 	}
@@ -56,7 +56,7 @@ func TestMain(m *testing.M) {
 	fmt.Println(c)
 
 	// Node readiness.
-	err = healthcheck.VerifyNodeReadiness(client)
+	err = healthcheck.RetryVerifyNodeReadiness(client)
 	if err != nil {
 		panic(err)
 	}

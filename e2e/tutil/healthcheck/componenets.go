@@ -14,9 +14,30 @@
 
 package healthcheck
 
-const (
-	// RetryAttempts specifies the amount of retries are allowed when getting a file from a server.
-	retryAttempts = 150
-	// RetrySleepSeconds specifies the time to sleep after a failed attempt to get a file form a server.
-	retrySleepSeconds = 5
+import (
+	"fmt"
+
+	"k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8s "k8s.io/client-go/kubernetes"
 )
+
+// VerifyComponentStatues returns error if any component is not ready.
+func VerifyComponentStatues(client *k8s.Clientset) error {
+	compstat, err := client.CoreV1().ComponentStatuses().List(metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	for _, cs := range compstat.Items {
+		healthy := false
+		for _, c := range cs.Conditions {
+			if c.Type == v1.ComponentHealthy {
+				healthy = true
+			}
+		}
+		if !healthy {
+			return fmt.Errorf("component %s not healthy", cs.Name)
+		}
+	}
+	return nil
+}

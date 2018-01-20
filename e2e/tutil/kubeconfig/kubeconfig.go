@@ -107,12 +107,14 @@ func GetConfigFilePath(existing *cluster.Cluster, sshAgent *agent.Keyring) (stri
 	if err != nil {
 		return "", err
 	}
+
+	fmt.Println(string(bytes))
 	_, err = f.WriteString(string(bytes))
 	if err != nil {
 		return "", err
 	}
 	defer f.Close()
-	return "", nil
+	return localPath, nil
 }
 
 const (
@@ -124,18 +126,16 @@ const (
 
 // RetryGetConfigFilePath trys to get Kubeconfig file path until timeout doesn't occurs.
 func RetryGetConfigFilePath(existing *cluster.Cluster, sshAgent *agent.Keyring) (string, error) {
-	var file string
-	var err error
 	for i := 0; i <= RetryAttempts; i++ {
-		file, err = GetConfigFilePath(existing, sshAgent)
+		file, err := GetConfigFilePath(existing, sshAgent)
 		if err != nil {
 			logger.Debug("Waiting for Kubernetes to come up.. [%v]", err)
 			time.Sleep(time.Duration(RetrySleepSeconds) * time.Second)
 			continue
 		}
-		return "", nil
+		return file, nil
 	}
-	return file, fmt.Errorf("Timedout writing kubeconfig")
+	return "", fmt.Errorf("Timedout writing kubeconfig")
 }
 
 // getKubeConfigPath create file for Kubeconfig

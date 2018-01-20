@@ -14,6 +14,7 @@
 
 package digitalocean
 
+/*
 import (
 	"github.com/kris-nova/kubicorn/apis/cluster"
 	"github.com/kris-nova/kubicorn/cloud"
@@ -66,3 +67,4 @@ func DestroyDOUbuntuCluster(reconciler cloud.Reconciler) error {
 	}
 	return nil
 }
+*/

@@ -22,8 +22,8 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 )
 
-// VerifyComponentStatues returns error if any component is not ready.
-func VerifyComponentStatues(client *k8s.Clientset) error {
+// VerifyComponentStatuses returns error if any component is not ready.
+func VerifyComponentStatuses(client *k8s.Clientset) error {
 	compstat, err := client.CoreV1().ComponentStatuses().List(metav1.ListOptions{})
 	if err != nil {
 		return err

@@ -107,8 +107,6 @@ func GetConfigFilePath(existing *cluster.Cluster, sshAgent *agent.Keyring) (stri
 	if err != nil {
 		return "", err
 	}
-
-	fmt.Println(string(bytes))
 	_, err = f.WriteString(string(bytes))
 	if err != nil {
 		return "", err

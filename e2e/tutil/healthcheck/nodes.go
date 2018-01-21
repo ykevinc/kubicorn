@@ -24,6 +24,29 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 )
 
+// RetryVerifyNodeCount waits for expected number of nodes to come up.
+func RetryVerifyNodeCount(client *k8s.Clientset, expectedNodes int) error {
+	for i := 0; i <= retryAttempts; i++ {
+		cnt, err := verifyNodeCount(client, expectedNodes)
+		if err != nil || cnt != expectedNodes {
+			logger.Debug("Waiting for Nodes to be created..")
+			time.Sleep(time.Duration(retrySleepSeconds) * time.Second)
+			continue
+		}
+		return nil
+	}
+	return fmt.Errorf("Timedout waiting nodes to be created.")
+}
+
+// verifyNodeCount returns number of nodes in the cluster.
+func verifyNodeCount(client *k8s.Clientset, expectedNodes int) (int, error) {
+	nodes, err := client.CoreV1().Nodes().List(metav1.ListOptions{})
+	if err != nil {
+		return -1, err
+	}
+	return len(nodes.Items), nil
+}
+
 // RetryVerifyNodeReadiness returns error in case any node is not ready, after several trys.
 func RetryVerifyNodeReadiness(client *k8s.Clientset) error {
 	for i := 0; i <= retryAttempts; i++ {

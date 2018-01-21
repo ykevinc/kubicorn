@@ -13,21 +13,21 @@
 // limitations under the License.
 
 package digitalocean
-
+/*
 import (
-	/*"bytes"
-	"fmt"*/
 	"testing"
-	/*
-		"github.com/kris-nova/kubicorn/cutil/agent"
-		"github.com/kris-nova/kubicorn/e2e/tutil/healthcheck"
-		"github.com/kris-nova/kubicorn/e2e/tutil/k8slogger"
-		"github.com/kris-nova/kubicorn/e2e/tutil/kubeconfig"
-		"github.com/kris-nova/kubicorn/e2e/tutil/kubernetes"
-		"github.com/kris-nova/kubicorn/e2e/tutil/sshcmd"*/)
+	"time"
+
+	"github.com/kris-nova/kubicorn/cutil/agent"
+	"github.com/kris-nova/kubicorn/e2e/tutil/healthcheck"
+	"github.com/kris-nova/kubicorn/e2e/tutil/k8slogger"
+	"github.com/kris-nova/kubicorn/e2e/tutil/kubeconfig"
+	"github.com/kris-nova/kubicorn/e2e/tutil/kubernetes"
+	"github.com/kris-nova/kubicorn/e2e/tutil/sshcmd"
+)
 
 func TestMain(m *testing.M) {
-	/*// Create cluster.
+	// Create cluster.
 	cluster, reconciler, err := CreateDOUbuntuCluster()
 	if err != nil {
 		panic(err)
@@ -47,12 +47,10 @@ func TestMain(m *testing.M) {
 	}
 
 	// Node count.
-	c, err := healthcheck.RetryGetNodeCount(client, 3)
+	err = healthcheck.RetryVerifyNodeCount(client, 3)
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Println(c)
 
 	// Node readiness.
 	err = healthcheck.RetryVerifyNodeReadiness(client)
@@ -60,8 +58,8 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 
-	// VerifyComponentStatues.
-	err = healthcheck.VerifyComponentStatues(client)
+	// Make sure componenets are ready.
+	err = healthcheck.VerifyComponentStatuses(client)
 	if err != nil {
 		panic(err)
 	}
@@ -72,18 +70,17 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 
-	rc, err := k8slogger.GetPodLogsStream(client, "sonobuoy", "heptio-sonobuoy")
+	time.Sleep(1 * time.Minute)
+
+	err = k8slogger.WaitPodLogsStream(client, "sonobuoy", "heptio-sonobuoy")
 	if err != nil {
 		panic(err)
 	}
-
-	b := new(bytes.Buffer)
-	b.ReadFrom(rc)
-	fmt.Println(b.String())
 
 	// Remove cluster.
 	err = DestroyDOUbuntuCluster(reconciler)
 	if err != nil {
 		panic(err)
-	}*/
+	}
 }
+*/

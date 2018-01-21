@@ -13,7 +13,6 @@
 // limitations under the License.
 
 package digitalocean
-
 /*
 import (
 	"github.com/kris-nova/kubicorn/apis/cluster"

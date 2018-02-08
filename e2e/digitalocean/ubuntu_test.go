@@ -13,17 +13,18 @@
 // limitations under the License.
 
 package digitalocean
-/*
+
 import (
 	"testing"
-	"time"
 
+	"github.com/kris-nova/kubicorn/cloud"
 	"github.com/kris-nova/kubicorn/cutil/agent"
 	"github.com/kris-nova/kubicorn/e2e/tutil/healthcheck"
 	"github.com/kris-nova/kubicorn/e2e/tutil/k8slogger"
-	"github.com/kris-nova/kubicorn/e2e/tutil/kubeconfig"
 	"github.com/kris-nova/kubicorn/e2e/tutil/kubernetes"
-	"github.com/kris-nova/kubicorn/e2e/tutil/sshcmd"
+	"github.com/kris-nova/kubicorn/e2e/tutil/scp"
+	"github.com/kris-nova/kubicorn/e2e/tutil/ssh"
+	"github.com/mholt/archiver"
 )
 
 func TestMain(m *testing.M) {
@@ -34,47 +35,69 @@ func TestMain(m *testing.M) {
 	}
 
 	// Get kubePath.
-	ssh := agent.NewAgent()
-	kubePath, err := kubeconfig.RetryGetConfigFilePath(cluster, ssh)
+	agnt := agent.NewAgent()
+	kubeFile, err := scp.RetryDownloadFile(cluster, agnt, "/root/.kube/config")
 	if err != nil {
-		panic(err)
+		handleError(reconciler, err)
+	}
+
+	kubePath, err := scp.CreateTempFileFromBytes(kubeFile, ".kube", "config")
+	if err != nil {
+		handleError(reconciler, err)
 	}
 
 	// New Kubernetes Client.
 	client, err := kubernetes.NewClient(kubePath)
 	if err != nil {
-		panic(err)
-	}
-
-	// Node count.
-	err = healthcheck.RetryVerifyNodeCount(client, 3)
-	if err != nil {
-		panic(err)
+		handleError(reconciler, err)
 	}
 
 	// Node readiness.
-	err = healthcheck.RetryVerifyNodeReadiness(client)
+	_, err = healthcheck.RetryVerifyNodeReadiness(client)
 	if err != nil {
-		panic(err)
+		handleError(reconciler, err)
 	}
+	/*if count != 3 {
+		handleError(reconciler, fmt.Errorf("node count missmatch"))
+	}*/
 
 	// Make sure componenets are ready.
 	err = healthcheck.VerifyComponentStatuses(client)
 	if err != nil {
-		panic(err)
+		handleError(reconciler, err)
 	}
 
-	err = sshcmd.ExecCommandSSH(cluster, agent.NewAgent(),
+	// Create Sonobuoy stuff.
+	err = ssh.ExecCommandSSH(cluster, agent.NewAgent(),
 		"kubectl apply -f https://raw.githubusercontent.com/heptio/sonobuoy/master/examples/quickstart.yaml")
 	if err != nil {
-		panic(err)
+		handleError(reconciler, err)
 	}
-
-	time.Sleep(1 * time.Minute)
 
 	err = k8slogger.WaitPodLogsStream(client, "sonobuoy", "heptio-sonobuoy")
 	if err != nil {
-		panic(err)
+		handleError(reconciler, err)
+	}
+
+	err = ssh.ExecCommandSSH(cluster, agent.NewAgent(),
+		"kubectl cp heptio-sonobuoy/sonobuoy:/tmp/sonobuoy /root/archive --namespace=heptio-sonobuoy && mv /root/archive/*sonobuoy* /root/archive/sonobuoy.tar.gz")
+	if err != nil {
+		handleError(reconciler, err)
+	}
+
+	sb, err := scp.RetryDownloadFile(cluster, agent.NewAgent(), "/root/archive/sonobuoy.tar.gz")
+	if err != nil {
+		handleError(reconciler, err)
+	}
+
+	sbPath, err := scp.CreateTempFileFromBytes(sb, "archive", "sonobuoy.tar.gz")
+	if err != nil {
+		handleError(reconciler, err)
+	}
+
+	err = archiver.Zip.Open(sbPath, "./")
+	if err != nil {
+		handleError(reconciler, err)
 	}
 
 	// Remove cluster.
@@ -83,4 +106,12 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 }
-*/
+
+func handleError(reconciler cloud.Reconciler, err error) {
+	// Remove cluster.
+	e := DestroyDOUbuntuCluster(reconciler)
+	if err != nil {
+		panic(e)
+	}
+	panic(err)
+}

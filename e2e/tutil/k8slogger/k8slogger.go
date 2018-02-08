@@ -30,7 +30,7 @@ const (
 	// RetryAttempts specifies the amount of retries are allowed when getting a file from a server.
 	retryAttempts = 500
 	// RetrySleepSeconds specifies the time to sleep after a failed attempt to get a file form a server.
-	retrySleepSeconds = 20
+	retrySleepSeconds = 5
 )
 
 // GetPodLogsStream return ReadCloser structure with logs from a pod.

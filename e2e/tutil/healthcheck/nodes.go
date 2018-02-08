@@ -24,48 +24,25 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 )
 
-// RetryVerifyNodeCount waits for expected number of nodes to come up.
-func RetryVerifyNodeCount(client *k8s.Clientset, expectedNodes int) error {
+// RetryVerifyNodeReadiness returns node count or error in case any node is not ready, after several trys.
+func RetryVerifyNodeReadiness(client *k8s.Clientset) (int, error) {
 	for i := 0; i <= retryAttempts; i++ {
-		cnt, err := verifyNodeCount(client, expectedNodes)
-		if err != nil || cnt != expectedNodes {
-			logger.Debug("Waiting for Nodes to be created..")
-			time.Sleep(time.Duration(retrySleepSeconds) * time.Second)
-			continue
-		}
-		return nil
-	}
-	return fmt.Errorf("Timedout waiting nodes to be created.")
-}
-
-// verifyNodeCount returns number of nodes in the cluster.
-func verifyNodeCount(client *k8s.Clientset, expectedNodes int) (int, error) {
-	nodes, err := client.CoreV1().Nodes().List(metav1.ListOptions{})
-	if err != nil {
-		return -1, err
-	}
-	return len(nodes.Items), nil
-}
-
-// RetryVerifyNodeReadiness returns error in case any node is not ready, after several trys.
-func RetryVerifyNodeReadiness(client *k8s.Clientset) error {
-	for i := 0; i <= retryAttempts; i++ {
-		err := verifyNodeReadiness(client)
+		cnt, err := verifyNodeReadiness(client)
 		if err != nil {
 			logger.Debug("Waiting for Nodes to become ready..")
 			time.Sleep(time.Duration(retrySleepSeconds) * time.Second)
 			continue
 		}
-		return nil
+		return cnt, nil
 	}
-	return fmt.Errorf("Timedout waiting nodes to become ready")
+	return 0, fmt.Errorf("Timedout waiting nodes to become ready")
 }
 
-// verifyNodeReadiness returns error in case any node is not ready.
-func verifyNodeReadiness(client *k8s.Clientset) error {
+// verifyNodeReadiness returns node number and error in case any node is not ready.
+func verifyNodeReadiness(client *k8s.Clientset) (int, error) {
 	nodes, err := client.CoreV1().Nodes().List(metav1.ListOptions{})
 	if err != nil {
-		return err
+		return 0, err
 	}
 	for _, node := range nodes.Items {
 		status := false
@@ -75,8 +52,8 @@ func verifyNodeReadiness(client *k8s.Clientset) error {
 			}
 		}
 		if !status {
-			return fmt.Errorf("node %s not ready", node.Name)
+			return len(nodes.Items), fmt.Errorf("node %s not ready", node.Name)
 		}
 	}
-	return nil
+	return len(nodes.Items), nil
 }

@@ -1,4 +1,0 @@
-kubeconfig
-==========
-
-Get Kubernetes config.

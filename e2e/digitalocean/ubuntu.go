@@ -13,7 +13,7 @@
 // limitations under the License.
 
 package digitalocean
-/*
+
 import (
 	"github.com/kris-nova/kubicorn/apis/cluster"
 	"github.com/kris-nova/kubicorn/cloud"
@@ -27,7 +27,6 @@ import (
 // CreateDOUbuntuCluster creates new Ubuntu cluster with 3 nodes
 // on the DigitalOcean platform and returns cluster object and reconciler.
 func CreateDOUbuntuCluster() (*cluster.Cluster, cloud.Reconciler, error) {
-
 	// Logger level
 	logger.Level = 4
 
@@ -66,4 +65,3 @@ func DestroyDOUbuntuCluster(reconciler cloud.Reconciler) error {
 	}
 	return nil
 }
-*/

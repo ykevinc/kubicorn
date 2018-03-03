@@ -156,15 +156,18 @@ func (r *Vpc) Delete(actual cloud.Resource, immutable *cluster.Cluster) (*cluste
 	if deleteResource.Identifier == "" {
 		return nil, nil, fmt.Errorf("Unable to delete VPC resource without ID [%s]", deleteResource.Name)
 	}
-	input := &ec2.DeleteVpcInput{
-		VpcId: &actual.(*Vpc).Identifier,
+	if !immutable.Network.Preserve {
+		input := &ec2.DeleteVpcInput{
+			VpcId: &actual.(*Vpc).Identifier,
+		}
+		_, err := Sdk.Ec2.DeleteVpc(input)
+		if err != nil {
+			return nil, nil, err
+		}
+		logger.Success("Deleted VPC [%s]", actual.(*Vpc).Identifier)
+	} else {
+		logger.Success("Preserved VPS[%s]", actual.(*Vpc).Identifier)
 	}
-	_, err := Sdk.Ec2.DeleteVpc(input)
-	if err != nil {
-		return nil, nil, err
-	}
-	logger.Success("Deleted VPC [%s]", actual.(*Vpc).Identifier)
-
 	newResource := &Vpc{
 		Shared: Shared{
 			Name: deleteResource.Name,

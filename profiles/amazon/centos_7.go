@@ -39,6 +39,7 @@ func NewCentosCluster(name string) *cluster.Cluster {
 			Type:       cluster.NetworkTypePublic,
 			CIDR:       "10.0.0.0/16",
 			InternetGW: &cluster.InternetGW{},
+			Preserve:   false,
 		},
 		Values: &cluster.Values{
 			ItemMap: map[string]string{

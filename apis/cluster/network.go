@@ -31,4 +31,5 @@ type Network struct {
 	Identifier        string      `json:"identifier,omitempty"`
 	Type              string      `json:"type,omitempty"`
 	InternetGW        *InternetGW `json:"internetgw,omitempty"`
+	Preserve          bool        `json:"preserve,omitempty"`
 }

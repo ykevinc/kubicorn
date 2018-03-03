@@ -160,23 +160,28 @@ func (r *InternetGateway) Delete(actual cloud.Resource, immutable *cluster.Clust
 	}
 	ig := output.InternetGateways[0]
 
-	detinput := &ec2.DetachInternetGatewayInput{
-		InternetGatewayId: ig.InternetGatewayId,
-		VpcId:             &immutable.Network.Identifier,
-	}
-	_, err = Sdk.Ec2.DetachInternetGateway(detinput)
-	if err != nil {
-		return nil, nil, err
+	if !immutable.Network.Preserve {
+		detinput := &ec2.DetachInternetGatewayInput{
+			InternetGatewayId: ig.InternetGatewayId,
+			VpcId:             &immutable.Network.Identifier,
+		}
+		_, err = Sdk.Ec2.DetachInternetGateway(detinput)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		delinput := &ec2.DeleteInternetGatewayInput{
+			InternetGatewayId: ig.InternetGatewayId,
+		}
+		_, err = Sdk.Ec2.DeleteInternetGateway(delinput)
+		if err != nil {
+			return nil, nil, err
+		}
+		logger.Success("Deleted internetgateway [%s]", actual.(*InternetGateway).Identifier)
+	} else {
+		logger.Success("Preserved internetgateway [%s]", actual.(*InternetGateway).Identifier)
 	}
 
-	delinput := &ec2.DeleteInternetGatewayInput{
-		InternetGatewayId: ig.InternetGatewayId,
-	}
-	_, err = Sdk.Ec2.DeleteInternetGateway(delinput)
-	if err != nil {
-		return nil, nil, err
-	}
-	logger.Success("Deleted internetgateway [%s]", actual.(*InternetGateway).Identifier)
 	newResource := &InternetGateway{}
 	newResource.Name = actual.(*InternetGateway).Name
 	newResource.Tags = actual.(*InternetGateway).Tags
